@@ -30,12 +30,18 @@ Created a complete Docker setup with:
 ### File: `Dockerfile`
 
 Multi-stage build with:
-- Build stage: Installs all dependencies, initializes database, indexes content, builds application
+- Build stage: Installs all dependencies, conditionally initializes database, indexes content, builds application
 - Runtime stage: Only production dependencies and built artifacts
+- **Build argument `USE_TURSO`**: Controls database initialization (default: `false`)
+  - `false`: Initializes local.db during build (for local development)
+  - `true`: Skips local.db initialization (for production with Turso)
 
 ```dockerfile
 # Build stage
 FROM node:20-slim AS builder
+
+# Build argument to control database initialization
+ARG USE_TURSO=false
 
 # Install pnpm
 RUN corepack enable && corepack prepare pnpm@latest --activate
@@ -52,8 +58,13 @@ RUN pnpm install --no-frozen-lockfile
 # Copy source files
 COPY . .
 
-# Initialize database and index content for build
-RUN pnpm db:init:local && pnpm index:local
+# Initialize database and index content for build (only if not using Turso)
+# When USE_TURSO=true, assumes Turso database is already indexed
+RUN if [ "$USE_TURSO" = "false" ]; then \
+      pnpm db:init:local && pnpm index:local; \
+    else \
+      touch local.db; \
+    fi
 
 # Build application
 RUN pnpm build
@@ -164,11 +175,14 @@ coverage/
 Easy local testing with environment variable support:
 
 ```yaml
-version: '3.8'
-
 services:
   astro-vault:
-    build: .
+    build:
+      context: .
+      args:
+        # Set to "true" for production builds using Turso
+        # Set to "false" (default) for local development with local.db
+        USE_TURSO: "false"
     ports:
       - "4321:4321"
     environment:
@@ -197,8 +211,21 @@ services:
 
 ### Build Docker Image
 
+**For local development (with local.db):**
 ```bash
 docker build -t astro-vault .
+```
+
+**For production (with Turso):**
+```bash
+# Build without initializing local.db (assumes Turso is already indexed)
+docker build --build-arg USE_TURSO=true -t astro-vault .
+```
+
+**Important**: When using `USE_TURSO=true`, you must ensure your Turso database is already initialized and indexed with content. Run these commands once:
+```bash
+pnpm db:init    # Initialize Turso schema
+pnpm index      # Index content to Turso
 ```
 
 ### Run with Docker
@@ -223,18 +250,29 @@ docker run -p 4321:4321 --env-file .env astro-vault
 
 ### Run with Docker Compose
 
+**For local development:**
 ```bash
 # Build and start
-docker-compose up
+docker compose up
 
 # Build in detached mode
-docker-compose up -d
+docker compose up -d
 
 # View logs
-docker-compose logs -f
+docker compose logs -f
 
 # Stop
-docker-compose down
+docker compose down
+```
+
+**For testing production Turso build locally:**
+```bash
+# Edit docker-compose.yml and set USE_TURSO: "true"
+# Then ensure Turso is indexed first
+pnpm db:init && pnpm index
+
+# Build and start
+docker compose up --build
 ```
 
 ## Key Features
@@ -372,6 +410,31 @@ flyctl deploy
 railway up
 
 # Set environment variables in Railway dashboard
+```
+
+### Coolify
+
+**Before deploying**, ensure your Turso database is indexed:
+```bash
+pnpm db:init    # Initialize Turso schema
+pnpm index      # Index content to Turso
+```
+
+**Coolify Configuration:**
+
+1. **Create new resource** → Docker Image
+2. **Build Pack**: Dockerfile
+3. **Build Arguments**: Add `USE_TURSO=true`
+4. **Environment Variables** (in Coolify dashboard):
+   - `TURSO_DB_URL`: Your Turso database URL
+   - `TURSO_AUTH_TOKEN`: Your Turso authentication token
+   - `EMBEDDING_PROVIDER`: `local` (or `gemini`/`openai` with API keys)
+5. **Port**: 4321
+6. **Health Check Path**: `/`
+
+**Manual build command** (if needed):
+```bash
+docker build --build-arg USE_TURSO=true -t astro-vault .
 ```
 
 ## Environment Variables

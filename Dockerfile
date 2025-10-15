@@ -1,6 +1,9 @@
 # Build stage
 FROM node:20-slim AS builder
 
+# Build argument to control database initialization
+ARG USE_TURSO=false
+
 # Install pnpm
 RUN corepack enable && corepack prepare pnpm@latest --activate
 
@@ -16,8 +19,13 @@ RUN pnpm install --no-frozen-lockfile
 # Copy source files
 COPY . .
 
-# Initialize database and index content for build
-RUN pnpm db:init:local && pnpm index:local
+# Initialize database and index content for build (only if not using Turso)
+# When USE_TURSO=true, assumes Turso database is already indexed
+RUN if [ "$USE_TURSO" = "false" ]; then \
+      pnpm db:init:local && pnpm index:local; \
+    else \
+      touch local.db; \
+    fi
 
 # Build application
 RUN pnpm build

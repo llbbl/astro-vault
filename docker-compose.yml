@@ -1,6 +1,11 @@
 services:
   astro-vault:
-    build: .
+    build:
+      context: .
+      args:
+        # Set to "true" for production builds using Turso
+        # Set to "false" (default) for local development with local.db
+        USE_TURSO: "false"
     ports:
       - "4321:4321"
     environment:
