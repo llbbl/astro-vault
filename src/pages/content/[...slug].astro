@@ -39,7 +39,10 @@ marked.use({
   renderer: {
     heading({ tokens, depth }) {
       const text = this.parser.parseInline(tokens);
-      const id = text.toLowerCase().replace(/\s+/g, '-').replace(/[^\w-]/g, '');
+      const id = text
+        .toLowerCase()
+        .replace(/\s+/g, '-')
+        .replace(/[^\w-]/g, '');
       return `<h${depth} id="${id}">${text}</h${depth}>`;
     },
     link({ href, title, tokens }) {
@@ -53,8 +56,8 @@ marked.use({
 
       // Internal links open in same tab
       return `<a href="${href}"${titleAttr}>${text}</a>`;
-    }
-  }
+    },
+  },
 });
 
 // Convert markdown to HTML

@@ -3,19 +3,16 @@
  * Falls back to local SQLite file when Turso credentials aren't available
  */
 
-import { config } from 'dotenv';
 import { type Client, createClient } from '@libsql/client';
 import { logger } from '@logan/logger';
-
-// Load .env file
-config();
 
 let client: Client | null = null;
 
 export function getTursoClient(): Client {
   if (!client) {
-    const url = process.env.TURSO_DB_URL;
-    const authToken = process.env.TURSO_AUTH_TOKEN;
+    const url = import.meta.env.TURSO_DB_URL || process.env.TURSO_DB_URL;
+    const authToken =
+      import.meta.env.TURSO_AUTH_TOKEN || process.env.TURSO_AUTH_TOKEN;
 
     if (url && authToken) {
       // Use Turso remote database
