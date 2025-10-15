@@ -487,7 +487,7 @@ User (Tokyo) → [100 km] → Edge Server (Tokyo) → Data (cached/replicated)
 
 ## Practical Example: Same Code, Different Runtimes
 
-### Node.js
+### Node.js Example
 
 ```javascript
 // server.js
@@ -505,7 +505,7 @@ server.listen(3000);
 
 Run: `node server.js`
 
-### Bun
+### Bun Example
 
 ```javascript
 // server.ts
@@ -520,7 +520,7 @@ Bun.serve({
 
 Run: `bun server.ts`
 
-### Deno
+### Deno Example
 
 ```javascript
 // server.ts
@@ -534,7 +534,7 @@ Deno.serve(async (req) => {
 
 Run: `deno run --allow-read --allow-net server.ts`
 
-### Cloudflare Workers
+### Cloudflare Workers Example
 
 ```javascript
 // worker.js

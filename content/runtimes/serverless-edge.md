@@ -666,7 +666,7 @@ git push origin main
 vercel
 ```
 
-### Cloudflare Workers
+### Cloudflare Workers Deployment
 
 ```bash
 # Install Wrangler

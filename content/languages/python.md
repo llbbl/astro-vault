@@ -724,7 +724,7 @@ plt.ylabel('Revenue ($)')
 plt.show()
 ```
 
-### Web Scraping
+### Web Scraping Example
 
 ```python
 import requests

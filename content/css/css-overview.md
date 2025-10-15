@@ -140,7 +140,7 @@ import styles from './Button.module.css';
   - Why utility-first won
   - Timeline of major shifts
 
-### CSS-in-JS
+### CSS-in-JS Libraries
 
 - **[styled-components](/content/css/styled-components)** - Write CSS in JS
   - Dynamic styling with props

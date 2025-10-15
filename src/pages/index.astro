@@ -18,28 +18,74 @@ import DocsLayout from '../layouts/DocsLayout.astro';
         <article class="prose prose-neutral dark:prose-invert max-w-none">
           <div class="mb-8">
             <h1 id="welcome" class="text-4xl font-bold tracking-tight text-balance mb-4">
-              Welcome to Your Documentation
+              Welcome to Astro Vault
             </h1>
-            <p class="text-lg text-muted-foreground leading-relaxed">
-              Your content is powered by libSQL with vector search capabilities.
+            <p class="text-lg text-muted-foreground leading-relaxed mb-4">
+              A curated collection of JavaScript and TypeScript reference articles covering modern web development technologies, frameworks, databases, and deployment strategies.
+            </p>
+            <p class="text-base text-muted-foreground leading-relaxed">
+              This vault serves as both a learning resource and a reference implementation of the
+              <a href="https://github.com/llbbl/semantic-docs" target="_blank" rel="noopener noreferrer" class="text-primary underline decoration-2 underline-offset-2 font-medium hover:opacity-80">semantic-docs</a> Astro theme,
+              demonstrating semantic search capabilities powered by libSQL and vector embeddings.
             </p>
           </div>
 
+          <section id="about" class="mb-12">
+            <h2 class="text-3xl font-bold tracking-tight mb-4 text-balance">About This Vault</h2>
+            <p class="text-base leading-relaxed mb-4">
+              Astro Vault contains comprehensive documentation covering:
+            </p>
+            <ul class="space-y-2 mb-4">
+              <li>🎨 <strong>CSS & Styling</strong>: Tailwind, Bootstrap, styled-components, and CSS framework history</li>
+              <li>🗄️ <strong>Databases</strong>: PostgreSQL, MongoDB, Redis, Turso, Supabase, and more</li>
+              <li>🚀 <strong>Deployment</strong>: Docker, Kubernetes, Cloud Run, ECS, and container orchestration</li>
+              <li>⚛️ <strong>Frameworks</strong>: React, Vue, Svelte, Angular, Next.js, and Astro</li>
+              <li>💻 <strong>Languages</strong>: TypeScript, Go, Python, and Rust</li>
+              <li>⚡ <strong>Runtimes</strong>: Node.js, Bun, Deno, and serverless/edge computing</li>
+            </ul>
+            <p class="text-base leading-relaxed">
+              View the source code and contribute on <a href="https://github.com/llbbl/astro-vault" target="_blank" rel="noopener noreferrer" class="text-primary underline decoration-2 underline-offset-2 font-medium hover:opacity-80">GitHub</a>.
+            </p>
+          </section>
+
           <section id="features" class="mb-12">
-            <h2 class="text-3xl font-bold tracking-tight mb-4 text-balance">Features</h2>
+            <h2 class="text-3xl font-bold tracking-tight mb-4 text-balance">Theme Features</h2>
+            <p class="text-base leading-relaxed mb-4">
+              Built with the <a href="https://github.com/llbbl/semantic-docs" target="_blank" rel="noopener noreferrer" class="text-primary underline decoration-2 underline-offset-2 font-medium hover:opacity-80">semantic-docs</a> Astro theme:
+            </p>
             <ul class="space-y-2">
-              <li>📝 <strong>Database Storage</strong>: Content stored in distributed libSQL database</li>
-              <li>🔍 <strong>Semantic Search</strong>: AI-powered vector search</li>
-              <li>🚀 <strong>Edge-Ready</strong>: Fast global access via Turso</li>
-              <li>🆓 <strong>Free Options</strong>: Local embeddings or Gemini API</li>
+              <li>📝 <strong>Database-Powered</strong>: Content stored in distributed libSQL database (Turso)</li>
+              <li>🔍 <strong>Semantic Search</strong>: AI-powered vector search for intelligent content discovery</li>
+              <li>🚀 <strong>Edge-Ready</strong>: Fast global access with automatic replication</li>
+              <li>🎨 <strong>Multiple Themes</strong>: Six built-in color themes (dark, light, ocean, forest, sunset, purple)</li>
+              <li>🆓 <strong>Flexible Embeddings</strong>: Local embeddings, Google Gemini, or OpenAI</li>
+              <li>⚡ <strong>Server-Side Rendering</strong>: Pre-rendered static pages with dynamic search API</li>
+              <li>📱 <strong>Responsive Design</strong>: Mobile-friendly with auto-generated table of contents</li>
             </ul>
           </section>
 
           <section id="getting-started" class="mb-12">
             <h2 class="text-3xl font-bold tracking-tight mb-4 text-balance">Getting Started</h2>
             <p class="text-base leading-relaxed mb-4">
-              Select an article from the sidebar or use the search bar for semantic search.
+              Browse articles from the sidebar navigation or use the semantic search bar to find content by meaning, not just keywords.
+              The search understands context and can find related articles even if they don't contain your exact search terms.
             </p>
+            <p class="text-base leading-relaxed">
+              Interested in building your own documentation site with semantic search? Check out the
+              <a href="https://github.com/llbbl/semantic-docs" target="_blank" rel="noopener noreferrer" class="text-primary underline decoration-2 underline-offset-2 font-medium hover:opacity-80">semantic-docs theme</a>
+              or fork this <a href="https://github.com/llbbl/astro-vault" target="_blank" rel="noopener noreferrer" class="text-primary underline decoration-2 underline-offset-2 font-medium hover:opacity-80">reference implementation</a>.
+            </p>
+          </section>
+
+          <section id="connect" class="mb-12">
+            <h2 class="text-3xl font-bold tracking-tight mb-4 text-balance">Stay Connected</h2>
+            <p class="text-base leading-relaxed mb-4">
+              Want to learn more about web development, databases, and modern frameworks?
+            </p>
+            <ul class="space-y-2">
+              <li>📧 <a href="https://llbbl.blog/subscribe/" target="_blank" rel="noopener noreferrer" class="text-primary underline decoration-2 underline-offset-2 font-medium hover:opacity-80"><strong>Subscribe to my blog</strong></a> for updates and deep dives</li>
+              <li>💬 <a href="https://bsky.app/profile/llbbl.blog" target="_blank" rel="noopener noreferrer" class="text-primary underline decoration-2 underline-offset-2 font-medium hover:opacity-80"><strong>Join the discussion on Bluesky</strong></a> and share your thoughts</li>
+            </ul>
           </section>
         </article>
       </div>
@@ -48,3 +94,18 @@ import DocsLayout from '../layouts/DocsLayout.astro';
     <DocsToc client:load />
   </div>
 </DocsLayout>
+
+<script>
+  // Load Ko-fi widget script
+  const script = document.createElement('script');
+  script.src = 'https://storage.ko-fi.com/cdn/scripts/overlay-widget.js';
+  script.onload = function() {
+    kofiWidgetOverlay.draw('llbbl', {
+      'type': 'floating-chat',
+      'floating-chat.donateButton.text': 'Support me',
+      'floating-chat.donateButton.background-color': '#00bfa5',
+      'floating-chat.donateButton.text-color': '#fff'
+    });
+  };
+  document.head.appendChild(script);
+</script>

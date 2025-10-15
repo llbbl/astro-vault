@@ -491,16 +491,16 @@ Foundation was Bootstrap's main competitor:
 
 ## Learning Resources
 
-### Bootstrap
+### Bootstrap Documentation
 - **Official Docs**: [getbootstrap.com](https://getbootstrap.com)
 - **Bootstrap Examples**: Official example templates
 - **Start Bootstrap**: Free themes
 
-### Foundation
+### Foundation Documentation
 - **Official Docs**: [get.foundation](https://get.foundation)
 - **Foundation Forum**: Community support
 
-### Bulma
+### Bulma Documentation
 - **Official Docs**: [bulma.io](https://bulma.io)
 - **Bulma Extensions**: Community plugins
 
