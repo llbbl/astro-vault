@@ -10,7 +10,10 @@ interface Props {
   description?: string;
 }
 
-const { title = 'Astro Vault', description = 'Documentation with semantic vector search powered by LibSQL and Turso' } = Astro.props;
+const {
+  title = 'Astro Vault',
+  description = 'Documentation with semantic vector search powered by LibSQL and Turso',
+} = Astro.props;
 const siteUrl = Astro.site || 'https://vault.llbbl.com';
 const fullTitle = title === 'Astro Vault' ? title : `${title} | Astro Vault`;
 const ogImage = `${siteUrl}/vault.jpg`;
