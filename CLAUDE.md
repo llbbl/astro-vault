@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-**semantic-docs** is an Astro-based documentation theme with semantic vector search powered by libsql-search. It combines static site generation with server-rendered search using Turso (libSQL) for edge-optimized semantic search capabilities.
+**astro-vault** is a comprehensive documentation site built with the semantic-docs Astro theme. It serves as both a curated collection of JavaScript/TypeScript reference articles and a reference implementation demonstrating semantic vector search powered by libsql-search. The site combines static site generation with server-rendered search using Turso (libSQL) for edge-optimized semantic search capabilities.
 
 ## Essential Commands
 
@@ -105,6 +105,22 @@ tags: [tag1, tag2]
 ---
 ```
 
+### Current Content Organization
+The vault contains the following content folders:
+- **build-tools/**: JavaScript/TypeScript build tools (Vite, Webpack, Rollup, esbuild, Turbopack, Rolldown, Parcel)
+- **css/**: CSS frameworks and styling approaches (Tailwind, Bootstrap, styled-components, history)
+- **databases/**: Database systems and best practices (PostgreSQL, MongoDB, Redis, Turso, Supabase, etc.)
+- **deployment/**: Deployment strategies and platforms (Docker, Kubernetes, Cloud Run, ECS, containerization)
+- **frameworks/**: Frontend frameworks (React, Vue, Svelte, Angular, Next.js, Astro)
+- **languages/**: Programming languages (TypeScript, Go, Python, Rust, comparisons)
+- **packages/**: Documentation for @logan/libsql-search and @logan/logger packages (published on JSR/NPM)
+- **queues/**: Queue systems and patterns (when to use queues, BullMQ, RabbitMQ, Kafka, AWS SQS, best practices)
+- **runtimes/**: JavaScript runtimes (Node.js, Bun, Deno, serverless, edge computing)
+- **search/**: Search technologies (LIKE queries, full-text search, semantic search, embeddings, Algolia, Elasticsearch, why LibSQL)
+- **theme/**: Theme documentation (overview, Biome, Marked, Tailwind, Vitest)
+
+When adding new content, place it in the appropriate folder or create a new folder if needed. All folders are automatically indexed and appear in the sidebar navigation.
+
 ### Selective Pre-rendering
 - Article pages (`/content/[...slug].astro`): Pre-rendered static at build time (`export const prerender = true`)
 - Search API (`/api/search.json.ts`): Server-rendered on-demand (`export const prerender = false`)
@@ -140,4 +156,18 @@ To switch providers, update `.env` and ensure API keys are set. The dimension (7
 - Results limit enforcement: 1-20 results
 - Standard rate limit headers (X-RateLimit-Limit, X-RateLimit-Remaining, X-RateLimit-Reset)
 - See `docs/SECURITY.md` for comprehensive security considerations
-- For every change we make related to the framework (so not adding or updating content), we should create a new markdown file in the docs folder, outlining the change that we made so that we can add and contribute the change back to the theme that we forked it from.
+
+### Contributing Changes Back to semantic-docs Theme
+This project is a fork/implementation of the [semantic-docs](https://github.com/llbbl/semantic-docs) theme. For every change we make related to the framework or theme (not content additions):
+- Create a new markdown file in the `docs/` folder
+- Document the change, why it was made, and how to implement it
+- This helps track improvements that can be contributed back to the upstream semantic-docs theme
+- Content changes (adding/updating articles in `content/`) do not need documentation
+
+## Deployment
+
+The site is deployed and live at [vault.llbbl.com](https://vault.llbbl.com). It's hosted on Coolify with:
+- Docker containerization (see `Dockerfile` and `docker-compose.yml`)
+- Turso database for edge-distributed semantic search
+- Automatic builds on push to main branch
+- Environment variables configured in Coolify dashboard
