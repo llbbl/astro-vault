@@ -10,7 +10,10 @@ interface Props {
   description?: string;
 }
 
-const { title = 'Astro Vault', description = 'Documentation' } = Astro.props;
+const { title = 'Astro Vault', description = 'Documentation with semantic vector search powered by LibSQL and Turso' } = Astro.props;
+const siteUrl = Astro.site || 'https://vault.llbbl.com';
+const fullTitle = title === 'Astro Vault' ? title : `${title} | Astro Vault`;
+const ogImage = `${siteUrl}/vault.jpg`;
 ---
 
 <!doctype html>
@@ -20,8 +23,25 @@ const { title = 'Astro Vault', description = 'Documentation' } = Astro.props;
     <meta name="viewport" content="width=device-width" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <meta name="generator" content={Astro.generator} />
-    <title>{title}</title>
-    {description && <meta name="description" content={description} />}
+    <title>{fullTitle}</title>
+    <meta name="description" content={description} />
+
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content={Astro.url} />
+    <meta property="og:title" content={fullTitle} />
+    <meta property="og:description" content={description} />
+    <meta property="og:image" content={ogImage} />
+
+    <!-- Twitter -->
+    <meta property="twitter:card" content="summary_large_image" />
+    <meta property="twitter:url" content={Astro.url} />
+    <meta property="twitter:title" content={fullTitle} />
+    <meta property="twitter:description" content={description} />
+    <meta property="twitter:image" content={ogImage} />
+
+    <!-- Canonical URL -->
+    <link rel="canonical" href={Astro.url} />
     <script is:inline>
       // Initialize theme immediately to prevent flash
       (function() {
