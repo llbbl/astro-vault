@@ -1,21 +1,12 @@
-# Production Dockerfile - Uses Turso database
-# Automatically indexes content to Turso during build
+# Dockerfile for local development and testing with embedded SQLite (local.db)
+# This creates a self-contained image with indexed content in local.db
 #
 # Usage:
-#   docker build \
-#     --build-arg TURSO_DB_URL=libsql://your-db.turso.io \
-#     --build-arg TURSO_AUTH_TOKEN=your-token \
-#     -t astro-vault .
-#
-# Or let CI/Coolify pass these as build args
+#   docker build -f Dockerfile.local -t astro-vault:local .
+#   docker run -p 4321:4321 astro-vault:local
 
 # Build stage
 FROM node:20-slim AS builder
-
-# Build arguments for Turso credentials (required for indexing and pre-rendering)
-ARG TURSO_DB_URL
-ARG TURSO_AUTH_TOKEN
-ARG EMBEDDING_PROVIDER=local
 
 # Install pnpm
 RUN corepack enable && corepack prepare pnpm@latest --activate
@@ -32,15 +23,10 @@ RUN pnpm install --no-frozen-lockfile
 # Copy source files
 COPY . .
 
-# Set environment variables for build
-ENV TURSO_DB_URL=$TURSO_DB_URL
-ENV TURSO_AUTH_TOKEN=$TURSO_AUTH_TOKEN
-ENV EMBEDDING_PROVIDER=$EMBEDDING_PROVIDER
+# Initialize database and index content for build
+RUN pnpm db:init:local && pnpm index:local
 
-# Index content to Turso database
-RUN pnpm db:init && pnpm index
-
-# Build application (queries Turso database for static pre-rendering)
+# Build application
 RUN pnpm build
 
 # Production stage
@@ -60,9 +46,7 @@ RUN pnpm install --prod --no-frozen-lockfile
 
 # Copy built application from builder
 COPY --from=builder /app/dist ./dist
-
-# Note: No local.db is copied - production uses Turso
-# Turso credentials are provided via runtime environment variables
+COPY --from=builder /app/local.db ./local.db
 
 # Create non-root user
 RUN groupadd -g 1001 nodejs && \

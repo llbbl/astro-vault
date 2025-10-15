@@ -18,30 +18,33 @@ Without Docker, developers must:
 ## Solution
 
 Created a complete Docker setup with:
-1. **Multi-stage Dockerfile** for optimized image size
-2. **.dockerignore** to exclude unnecessary files
-3. **docker-compose.yml** for easy local development and testing
-4. Support for both Turso (remote) and local.db (embedded) databases
-5. Build-time database initialization and content indexing
-6. Security best practices (non-root user, health checks)
+1. **Dockerfile** (default) - Production build that indexes content to Turso and builds the app
+2. **Dockerfile.local** - Local development build using embedded SQLite
+3. **.dockerignore** to exclude unnecessary files
+4. **docker-compose.yml** for easy local development and testing
+5. Security best practices (non-root user, health checks)
 
 ## Changes
 
-### File: `Dockerfile`
+### File: `Dockerfile` (Production)
 
-Multi-stage build with:
-- Build stage: Installs all dependencies, conditionally initializes database, indexes content, builds application
-- Runtime stage: Only production dependencies and built artifacts
-- **Build argument `USE_TURSO`**: Controls database initialization (default: `false`)
-  - `false`: Initializes local.db during build (for local development)
-  - `true`: Skips local.db initialization (for production with Turso)
+Multi-stage build for production using Turso:
+- Build stage: Accepts Turso credentials as build args, indexes content to Turso, then builds app
+- Runtime stage: Only production dependencies and built artifacts, uses Turso via runtime env vars
+- **Build args**: `TURSO_DB_URL`, `TURSO_AUTH_TOKEN` required
+- Automatically indexes latest content during every build
 
 ```dockerfile
+# Production Dockerfile - Uses Turso database
+# Automatically indexes content to Turso during build
+
 # Build stage
 FROM node:20-slim AS builder
 
-# Build argument to control database initialization
-ARG USE_TURSO=false
+# Build arguments for Turso credentials (required for indexing and pre-rendering)
+ARG TURSO_DB_URL
+ARG TURSO_AUTH_TOKEN
+ARG EMBEDDING_PROVIDER=local
 
 # Install pnpm
 RUN corepack enable && corepack prepare pnpm@latest --activate
@@ -58,15 +61,15 @@ RUN pnpm install --no-frozen-lockfile
 # Copy source files
 COPY . .
 
-# Initialize database and index content for build (only if not using Turso)
-# When USE_TURSO=true, assumes Turso database is already indexed
-RUN if [ "$USE_TURSO" = "false" ]; then \
-      pnpm db:init:local && pnpm index:local; \
-    else \
-      touch local.db; \
-    fi
+# Set environment variables for build
+ENV TURSO_DB_URL=$TURSO_DB_URL
+ENV TURSO_AUTH_TOKEN=$TURSO_AUTH_TOKEN
+ENV EMBEDDING_PROVIDER=$EMBEDDING_PROVIDER
 
-# Build application
+# Index content to Turso database
+RUN pnpm db:init && pnpm index
+
+# Build application (queries Turso database for static pre-rendering)
 RUN pnpm build
 
 # Production stage
@@ -170,35 +173,68 @@ coverage/
 .github/
 ```
 
+### File: `Dockerfile.local` (Local Development)
+
+Self-contained build for local development and testing:
+- Build stage: Creates local.db with indexed content
+- Runtime stage: Uses embedded local.db, no external dependencies
+- No build args required, completely self-contained
+- Perfect for local testing without Turso
+
+```dockerfile
+# Dockerfile for local development and testing with embedded SQLite (local.db)
+
+# Build stage
+FROM node:20-slim AS builder
+
+# Install pnpm
+RUN corepack enable && corepack prepare pnpm@latest --activate
+
+# Set working directory
+WORKDIR /app
+
+# Copy package files
+COPY package.json pnpm-lock.yaml* ./
+
+# Install dependencies
+RUN pnpm install --no-frozen-lockfile
+
+# Copy source files
+COPY . .
+
+# Initialize database and index content for build
+RUN pnpm db:init:local && pnpm index:local
+
+# Build application
+RUN pnpm build
+
+# Production stage
+FROM node:20-slim AS runtime
+
+# [... rest of runtime stage same as production ...]
+
+# Copy built application and local.db
+COPY --from=builder /app/dist ./dist
+COPY --from=builder /app/local.db ./local.db
+
+# [... rest of runtime configuration ...]
+```
+
 ### File: `docker-compose.yml`
 
-Easy local testing with environment variable support:
+Local development setup using Dockerfile.local:
 
 ```yaml
 services:
   astro-vault:
     build:
       context: .
-      args:
-        # Set to "true" for production builds using Turso
-        # Set to "false" (default) for local development with local.db
-        USE_TURSO: "false"
+      dockerfile: Dockerfile.local
     ports:
       - "4321:4321"
     environment:
       - HOST=0.0.0.0
       - PORT=4321
-      # Load Turso credentials from .env file
-      - TURSO_DB_URL=${TURSO_DB_URL}
-      - TURSO_AUTH_TOKEN=${TURSO_AUTH_TOKEN}
-      - EMBEDDING_PROVIDER=${EMBEDDING_PROVIDER:-local}
-      - GEMINI_API_KEY=${GEMINI_API_KEY}
-      - OPENAI_API_KEY=${OPENAI_API_KEY}
-    env_file:
-      - .env
-    volumes:
-      # Mount local.db for persistence in development
-      - ./local.db:/app/local.db
     healthcheck:
       test: ["CMD", "node", "-e", "require('http').get('http://localhost:4321/', (r) => {process.exit(r.statusCode === 200 ? 0 : 1)})"]
       interval: 30s
@@ -211,51 +247,49 @@ services:
 
 ### Build Docker Image
 
-**For local development (with local.db):**
+**For production (uses Turso, auto-indexes content):**
 ```bash
-docker build -t astro-vault .
+docker build \
+  --build-arg TURSO_DB_URL=libsql://your-db.turso.io \
+  --build-arg TURSO_AUTH_TOKEN=your-token \
+  -t astro-vault .
 ```
 
-**For production (with Turso):**
+This build will:
+1. Install dependencies
+2. Index all markdown content to your Turso database
+3. Build the application using Turso data for static pre-rendering
+
+**For local development (uses local.db):**
 ```bash
-# Build without initializing local.db (assumes Turso is already indexed)
-docker build --build-arg USE_TURSO=true -t astro-vault .
+docker build -f Dockerfile.local -t astro-vault:local .
 ```
 
-**Important**: When using `USE_TURSO=true`, you must ensure your Turso database is already initialized and indexed with content. Run these commands once:
-```bash
-pnpm db:init    # Initialize Turso schema
-pnpm index      # Index content to Turso
-```
+### Run Container
 
-### Run with Docker
-
-**Using local database (for testing):**
+**Production (Turso):**
 ```bash
-docker run -p 4321:4321 astro-vault
-```
-
-**Using Turso (production):**
-```bash
+# Runtime environment variables (can be different from build args)
 docker run -p 4321:4321 \
   -e TURSO_DB_URL=libsql://your-db.turso.io \
   -e TURSO_AUTH_TOKEN=your-token \
   astro-vault
 ```
 
-**Using .env file:**
+**Local development (local.db):**
 ```bash
-docker run -p 4321:4321 --env-file .env astro-vault
+docker run -p 4321:4321 astro-vault:local
 ```
 
-### Run with Docker Compose
+### Docker Compose (Local Development)
 
-**For local development:**
+The `docker-compose.yml` uses `Dockerfile.local` for local testing:
+
 ```bash
 # Build and start
 docker compose up
 
-# Build in detached mode
+# Detached mode
 docker compose up -d
 
 # View logs
@@ -263,16 +297,6 @@ docker compose logs -f
 
 # Stop
 docker compose down
-```
-
-**For testing production Turso build locally:**
-```bash
-# Edit docker-compose.yml and set USE_TURSO: "true"
-# Then ensure Turso is indexed first
-pnpm db:init && pnpm index
-
-# Build and start
-docker compose up --build
 ```
 
 ## Key Features
@@ -414,28 +438,27 @@ railway up
 
 ### Coolify
 
-**Before deploying**, ensure your Turso database is indexed:
-```bash
-pnpm db:init    # Initialize Turso schema
-pnpm index      # Index content to Turso
-```
-
 **Coolify Configuration:**
 
-1. **Create new resource** → Docker Image
-2. **Build Pack**: Dockerfile
-3. **Build Arguments**: Add `USE_TURSO=true`
-4. **Environment Variables** (in Coolify dashboard):
-   - `TURSO_DB_URL`: Your Turso database URL
+1. **Create new resource** → Docker Image (or connect GitHub repo)
+2. **Build Pack**: Dockerfile (default)
+3. **Build Arguments** (required - set in Coolify dashboard):
+   - `TURSO_DB_URL`: Your Turso database URL (e.g., `libsql://your-db.turso.io`)
    - `TURSO_AUTH_TOKEN`: Your Turso authentication token
-   - `EMBEDDING_PROVIDER`: `local` (or `gemini`/`openai` with API keys)
+   - `EMBEDDING_PROVIDER`: `local` (optional, defaults to `local`)
+4. **Runtime Environment Variables** (set in Coolify dashboard):
+   - `TURSO_DB_URL`: Your Turso database URL (same as build arg)
+   - `TURSO_AUTH_TOKEN`: Your Turso authentication token (same as build arg)
+   - `EMBEDDING_PROVIDER`: `local` (or `gemini`/`openai` if using cloud embeddings)
+   - Optional: `GEMINI_API_KEY` or `OPENAI_API_KEY` (if not using local embeddings)
 5. **Port**: 4321
 6. **Health Check Path**: `/`
 
-**Manual build command** (if needed):
-```bash
-docker build --build-arg USE_TURSO=true -t astro-vault .
-```
+**How it works:**
+- Every build automatically indexes the latest markdown content to Turso
+- Build args provide credentials for indexing and static pre-rendering
+- Runtime env vars provide credentials for the running container
+- No manual indexing step needed - just push code and deploy!
 
 ## Environment Variables
 

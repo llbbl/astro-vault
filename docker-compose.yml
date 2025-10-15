@@ -2,26 +2,12 @@ services:
   astro-vault:
     build:
       context: .
-      args:
-        # Set to "true" for production builds using Turso
-        # Set to "false" (default) for local development with local.db
-        USE_TURSO: "false"
+      dockerfile: Dockerfile.local
     ports:
       - "4321:4321"
     environment:
       - HOST=0.0.0.0
       - PORT=4321
-      # Load Turso credentials from .env file
-      - TURSO_DB_URL=${TURSO_DB_URL}
-      - TURSO_AUTH_TOKEN=${TURSO_AUTH_TOKEN}
-      - EMBEDDING_PROVIDER=${EMBEDDING_PROVIDER:-local}
-      - GEMINI_API_KEY=${GEMINI_API_KEY}
-      - OPENAI_API_KEY=${OPENAI_API_KEY}
-    env_file:
-      - .env
-    volumes:
-      # Mount local.db for persistence in development
-      - ./local.db:/app/local.db
     healthcheck:
       test: ["CMD", "node", "-e", "require('http').get('http://localhost:4321/', (r) => {process.exit(r.statusCode === 200 ? 0 : 1)})"]
       interval: 30s
