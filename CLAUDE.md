@@ -140,3 +140,4 @@ To switch providers, update `.env` and ensure API keys are set. The dimension (7
 - Results limit enforcement: 1-20 results
 - Standard rate limit headers (X-RateLimit-Limit, X-RateLimit-Remaining, X-RateLimit-Reset)
 - See `docs/SECURITY.md` for comprehensive security considerations
+- For every change we make related to the framework (so not adding or updating content), we should create a new markdown file in the docs folder, outlining the change that we made so that we can add and contribute the change back to the theme that we forked it from.

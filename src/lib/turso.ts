@@ -3,7 +3,12 @@
  * Falls back to local SQLite file when Turso credentials aren't available
  */
 
+import { config } from 'dotenv';
 import { type Client, createClient } from '@libsql/client';
+import { logger } from '@logan/logger';
+
+// Load .env file
+config();
 
 let client: Client | null = null;
 
@@ -14,10 +19,11 @@ export function getTursoClient(): Client {
 
     if (url && authToken) {
       // Use Turso remote database
+      logger.info(`Using Turso database: ${url}`);
       client = createClient({ url, authToken });
     } else {
       // Fall back to local libSQL file (for CI/development)
-      console.warn('Turso credentials not found, using local libSQL database');
+      logger.warn('Turso credentials not found, using local libSQL database');
       client = createClient({ url: 'file:local.db' });
     }
   }
