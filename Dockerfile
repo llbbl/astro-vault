@@ -37,8 +37,8 @@ ENV TURSO_DB_URL=$TURSO_DB_URL
 ENV TURSO_AUTH_TOKEN=$TURSO_AUTH_TOKEN
 ENV EMBEDDING_PROVIDER=$EMBEDDING_PROVIDER
 
-# Index content to Turso database
-RUN pnpm db:init && pnpm index
+# Index content to Turso database (env vars already set via ENV directives)
+RUN pnpm exec tsx scripts/init-db.ts && pnpm exec tsx scripts/index-content.ts
 
 # Build application (queries Turso database for static pre-rendering)
 RUN pnpm build
