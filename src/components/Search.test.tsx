@@ -10,16 +10,30 @@ describe('Search Component', () => {
     vi.clearAllMocks();
   });
 
-  it('should render search input', () => {
+  it('should render search button', () => {
     render(<Search />);
-    const input = screen.getByPlaceholderText('Search articles...');
-    expect(input).toBeDefined();
+    const button = screen.getByRole('button', { name: 'Search' });
+    expect(button).toBeDefined();
+  });
+
+  it('should open dialog when button is clicked', async () => {
+    render(<Search />);
+    const button = screen.getByRole('button', { name: 'Search' });
+
+    fireEvent.click(button);
+
+    await waitFor(() => {
+      const input = screen.getByPlaceholderText('Search articles...');
+      expect(input).toBeDefined();
+    });
   });
 
   it('should not search when query is less than 2 characters', async () => {
     render(<Search />);
-    const input = screen.getByPlaceholderText('Search articles...');
+    const button = screen.getByRole('button', { name: 'Search' });
+    fireEvent.click(button);
 
+    const input = await screen.findByPlaceholderText('Search articles...');
     fireEvent.change(input, { target: { value: 'a' } });
 
     await waitFor(
@@ -52,8 +66,10 @@ describe('Search Component', () => {
     } as Response);
 
     render(<Search />);
-    const input = screen.getByPlaceholderText('Search articles...');
+    const button = screen.getByRole('button', { name: 'Search' });
+    fireEvent.click(button);
 
+    const input = await screen.findByPlaceholderText('Search articles...');
     fireEvent.change(input, { target: { value: 'test' } });
 
     await waitFor(
@@ -63,7 +79,7 @@ describe('Search Component', () => {
           expect.objectContaining({
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ query: 'test', limit: 5 }),
+            body: JSON.stringify({ query: 'test', limit: 10 }),
           }),
         );
       },
@@ -93,14 +109,15 @@ describe('Search Component', () => {
     } as Response);
 
     render(<Search />);
-    const input = screen.getByPlaceholderText('Search articles...');
+    const button = screen.getByRole('button', { name: 'Search' });
+    fireEvent.click(button);
 
+    const input = await screen.findByPlaceholderText('Search articles...');
     fireEvent.change(input, { target: { value: 'test' } });
-    fireEvent.focus(input);
 
     await waitFor(() => {
       expect(screen.getByText('Test Article')).toBeDefined();
-      expect(screen.getByText('docs')).toBeDefined();
+      expect(screen.getByText('DOCS')).toBeDefined();
       expect(screen.getByText('testing')).toBeDefined();
     });
   });
@@ -109,8 +126,10 @@ describe('Search Component', () => {
     vi.mocked(global.fetch).mockRejectedValueOnce(new Error('Network error'));
 
     render(<Search />);
-    const input = screen.getByPlaceholderText('Search articles...');
+    const button = screen.getByRole('button', { name: 'Search' });
+    fireEvent.click(button);
 
+    const input = await screen.findByPlaceholderText('Search articles...');
     fireEvent.change(input, { target: { value: 'test' } });
 
     await waitFor(() => {
@@ -133,10 +152,11 @@ describe('Search Component', () => {
     } as Response);
 
     render(<Search />);
-    const input = screen.getByPlaceholderText('Search articles...');
+    const button = screen.getByRole('button', { name: 'Search' });
+    fireEvent.click(button);
 
+    const input = await screen.findByPlaceholderText('Search articles...');
     fireEvent.change(input, { target: { value: 'nonexistent' } });
-    fireEvent.focus(input);
 
     await waitFor(() => {
       expect(
@@ -145,9 +165,13 @@ describe('Search Component', () => {
     });
   });
 
-  it('should use custom placeholder', () => {
+  it('should use custom placeholder', async () => {
     render(<Search placeholder="Custom search..." />);
-    expect(screen.getByPlaceholderText('Custom search...')).toBeDefined();
+    const button = screen.getByRole('button', { name: 'Search' });
+    fireEvent.click(button);
+
+    const input = await screen.findByPlaceholderText('Custom search...');
+    expect(input).toBeDefined();
   });
 
   it('should respect maxResults prop', async () => {
@@ -162,9 +186,11 @@ describe('Search Component', () => {
       json: async () => mockResults,
     } as Response);
 
-    render(<Search maxResults={10} />);
-    const input = screen.getByPlaceholderText('Search articles...');
+    render(<Search maxResults={20} />);
+    const button = screen.getByRole('button', { name: 'Search' });
+    fireEvent.click(button);
 
+    const input = await screen.findByPlaceholderText('Search articles...');
     fireEvent.change(input, { target: { value: 'test' } });
 
     await waitFor(
@@ -172,7 +198,7 @@ describe('Search Component', () => {
         expect(fetch).toHaveBeenCalledWith(
           '/api/search.json',
           expect.objectContaining({
-            body: JSON.stringify({ query: 'test', limit: 10 }),
+            body: JSON.stringify({ query: 'test', limit: 20 }),
           }),
         );
       },
