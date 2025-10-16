@@ -68,7 +68,7 @@ export default function ThemeSwitcher() {
         <>
           <button
             type="button"
-            className="fixed inset-0 z-40 bg-transparent border-0 p-0 cursor-default"
+            className="fixed inset-0 z-[60] bg-transparent border-0 p-0 cursor-default"
             onClick={() => setIsOpen(false)}
             onKeyDown={(e) => {
               if (e.key === 'Escape' || e.key === 'Enter') {
@@ -77,7 +77,7 @@ export default function ThemeSwitcher() {
             }}
             aria-label="Close theme menu"
           />
-          <div className="absolute right-0 mt-2 w-48 rounded-md border border-border bg-popover shadow-lg z-50">
+          <div className="absolute right-0 mt-2 w-48 rounded-md border border-border bg-popover shadow-lg z-[70]">
             <div className="p-2">
               <div className="mb-2 px-2 py-1.5 text-xs font-semibold text-muted-foreground uppercase">
                 Theme
