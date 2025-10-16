@@ -4,6 +4,7 @@
  */
 
 import { search } from '@logan/libsql-search';
+import { logger } from '@logan/logger';
 import type { APIRoute } from 'astro';
 import { getTursoClient } from '../../lib/turso';
 import {
@@ -95,7 +96,7 @@ export const POST: APIRoute = async ({ request }) => {
       },
     );
   } catch (error) {
-    console.error('Search error:', error);
+    logger.error('Search error:', error);
 
     return new Response(
       JSON.stringify({
