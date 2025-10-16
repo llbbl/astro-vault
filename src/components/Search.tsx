@@ -145,6 +145,7 @@ export default function Search({
   return (
     <>
       <button
+        type="button"
         onClick={() => setOpen(true)}
         className="relative w-full h-10 flex items-center justify-center sm:justify-start px-2 py-2 text-left text-sm bg-muted/50 border border-input rounded-lg hover:bg-muted transition-colors sm:px-3 sm:pl-10"
         aria-label="Search"
@@ -160,11 +161,14 @@ export default function Search({
           strokeWidth="2"
           strokeLinecap="round"
           strokeLinejoin="round"
+          aria-hidden="true"
         >
           <circle cx="11" cy="11" r="8" />
           <path d="m21 21-4.35-4.35" />
         </svg>
-        <span className="text-muted-foreground truncate hidden sm:inline">{placeholder}</span>
+        <span className="text-muted-foreground truncate hidden sm:inline">
+          {placeholder}
+        </span>
         <kbd className="pointer-events-none absolute right-2 top-1/2 -translate-y-1/2 hidden lg:flex h-5 select-none items-center gap-1 rounded border border-border bg-muted px-1.5 font-mono text-[10px] font-medium opacity-100">
           <span className="text-xs">⌘</span>K
         </kbd>
