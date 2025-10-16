@@ -76,6 +76,7 @@ export default function ThemeSwitcher() {
               }
             }}
             aria-label="Close theme menu"
+            tabIndex={-1}
           />
           <div className="absolute right-0 mt-2 w-48 rounded-md border border-border bg-popover shadow-lg z-[70]">
             <div className="p-2">
